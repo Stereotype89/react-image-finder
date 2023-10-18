@@ -1,111 +1,93 @@
-import React, { Component } from 'react';
-import axios from 'axios';
-import { RotatingLines } from 'react-loader-spinner';
+import { useState, useEffect } from 'react';
+import Searchbar from './Searchbar/Searchbar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import fetchImages from '../services/image-fetch-api';
+import Button from './Button/Button';
+import Loader from './Loader/Loader';
+import Modal from './Modal/Modal';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { Button } from './Button/Button';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Searchbar } from './Searchbar/Searchbar';
-import { Modal } from './Modal/Modal';
+export default function App() {
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [queryString, setQueryString] = useState('');
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imageForModal, setImageForModal] = useState('');
 
-const apiKey = '38792090-476cb700ea90821fee266c404';
-
-export class App extends Component {
-  state = {
-    searchWords: '',
-    images: [],
-    showModal: false,
-    modalImage: '',
-    showLoader: false,
-    currentPage: 1,
+  const handleFormSubmit = queryString => {
+    setImages([]);
+    setPage(1);
+    setQueryString(queryString);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
-  };
+  useEffect(() => {
+    if (!queryString) {
+      return;
+    }
+    const getImages = async () => {
+      try {
+        setIsLoading(true);
+        const { hits } = await fetchImages(queryString, page);
+        setImages(prevImages => [...prevImages, ...hits]);
+      } catch (error) {
+        setError(error.message);
+        toast.error(`Fetch error: ${error}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  pushImagesToState = response => {
-    const imagesFromResponse = response.data.hits;
-    let newSearchArray = [];
-    newSearchArray = [...this.state.images, ...imagesFromResponse];
-    this.setState(({ images }) => ({ images: newSearchArray }));
-  };
-  setModalImage = linkImg => {
-    return this.setState(({ modalImage }) => ({ modalImage: linkImg }));
-  };
-  openLargeImage = linkImg => {
-    this.setModalImage(linkImg);
-    this.toggleModal();
-  };
+    getImages();
+  }, [queryString, page]);
 
-  loaderToggle = bool => {
-    return this.setState(({ showLoader }) => ({ showLoader: bool }));
-  };
-
-  getImages(words, page) {
-    this.loaderToggle(true);
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${words}&page=${page}&key=${apiKey}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-      .then(response => {
-        this.pushImagesToState(response);
-        this.loaderToggle(false);
-        this.setState(prevState => ({
-          currentPage: prevState.currentPage + 1,
-        }));
+  useEffect(() => {
+    if (page > 1) {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        left: 0,
+        behavior: 'smooth',
       });
-  }
+    }
+  });
 
-  searchFormSubmit = event => {
-    event.preventDefault();
-    this.setState({
-      searchWords: '',
-      images: [],
-      showModal: false,
-      modalImage: '',
-      currentPage: 1,
-    });
-    const searchWordsValue = event.target[1].value;
-
-    this.setState({ searchWords: searchWordsValue });
-    const page = 1;
-    this.getImages(searchWordsValue, page);
-    event.target.reset();
+  const handleImageClick = imageLink => {
+    setImageForModal(imageLink);
+    toggleModal();
   };
 
-  loadMoreFn = () => {
-    this.loaderToggle(true);
-    this.getImages(this.state.searchWords, this.state.currentPage);
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  render() {
-    return (
-      <div className="App">
-        {this.state.showModal && (
-          <Modal closeFn={this.toggleModal} loader={this.loaderToggle}>
-            <img src={this.state.modalImage} alt="modal" />
-          </Modal>
-        )}
-        <Searchbar onSubmit={this.searchFormSubmit} />
+  const toggleModal = () => {
+    setIsModalOpen(prevState => !prevState);
 
-        {this.state.searchWords !== '' && (
-          <ImageGallery
-            loader={this.loaderToggle}
-            imagesArray={this.state.images}
-            modalFn={this.openLargeImage}
-          ></ImageGallery>
-        )}
-        {this.state.showLoader && (
-          <RotatingLines
-            strokeColor="blue"
-            strokeWidth="5"
-            animationDuration="0.50"
-            width="70"
-            visible={true}
-          />
-        )}
-        {this.state.searchWords !== '' && <Button fn={this.loadMoreFn} />}
-      </div>
-    );
-  }
+    if (isModalOpen) {
+      setImageForModal('');
+    }
+  };
+
+  const isImages = images.length > 0;
+
+  return (
+    <>
+      <Searchbar onSubmit={handleFormSubmit} />
+      {isImages && (
+        <ImageGallery images={images} onImageClick={handleImageClick} />
+      )}
+      {isImages && isLoading === false && <Button onClick={handleLoadMore} />}
+      {isLoading && <Loader />}
+      {isModalOpen && (
+        <Modal
+          image={imageForModal}
+          description={queryString}
+          onClose={toggleModal}
+        />
+      )}
+      {error && <ToastContainer autoClose={3000} />}
+    </>
+  );
 }

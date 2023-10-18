@@ -1,0 +1,20 @@
+.loader {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+}
+
+.icon_spin {
+  margin-right: 10px;
+  animation: icon_spin 2s infinite linear;
+}
+
+@keyframes icon_spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
