@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/goit-react-hw-04-images/static/css/main.9d93c43d.css",
-    "main.js": "/goit-react-hw-04-images/static/js/main.b1fabaab.js",
-    "static/media/ico-search.svg": "/goit-react-hw-04-images/static/media/ico-search.b93eaa1fa5cabd009468.svg",
-    "index.html": "/goit-react-hw-04-images/index.html",
-    "main.9d93c43d.css.map": "/goit-react-hw-04-images/static/css/main.9d93c43d.css.map",
-    "main.b1fabaab.js.map": "/goit-react-hw-04-images/static/js/main.b1fabaab.js.map"
+    "main.css": "/react-image-finder/static/css/main.aabf7c98.css",
+    "main.js": "/react-image-finder/static/js/main.b1fabaab.js",
+    "static/media/ico-search.svg": "/react-image-finder/static/media/ico-search.b93eaa1fa5cabd009468.svg",
+    "index.html": "/react-image-finder/index.html",
+    "main.aabf7c98.css.map": "/react-image-finder/static/css/main.aabf7c98.css.map",
+    "main.b1fabaab.js.map": "/react-image-finder/static/js/main.b1fabaab.js.map"
   },
   "entrypoints": [
-    "static/css/main.9d93c43d.css",
+    "static/css/main.aabf7c98.css",
     "static/js/main.b1fabaab.js"
   ]
 }
